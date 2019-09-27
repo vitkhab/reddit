@@ -8,7 +8,11 @@ require './helpers'
 
 
 configure do
-    db = Mongo::Client.new([ ENV['DATABASE_URL'] || '127.0.0.1:27017' ], database: 'user_posts', heartbeat_frequency: 2)
+    db = Mongo::Client.new([ ENV['DATABASE_URL'] || '127.0.0.1:27017' ],
+        user: ENV['DATABASE_USER'] || '',
+        password: ENV['DATABASE_PASS'] || '',
+        database: 'user_posts',
+        heartbeat_frequency: 2)
     set :mongo_db, db[:posts]
     set :comments_db, db[:comments]
     set :users_db, db[:users]
