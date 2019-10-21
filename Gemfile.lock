@@ -32,6 +32,8 @@ GEM
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (4.1.0)
+    prometheus-client (0.8.0)
+      quantile (~> 0.2.1)
     puma (3.10.0)
     rack (2.0.5)
     rack-protection (2.0.2)
@@ -61,6 +63,7 @@ DEPENDENCIES
   haml
   json
   mongo
+  prometheus-client
   puma
   sinatra (~> 2.0.1)
 
