@@ -7,6 +7,7 @@ gem 'bcrypt'
 gem 'puma'
 gem 'mongo'
 gem 'json'
+gem 'prometheus-client'
 
 group :development do
     gem 'capistrano',         require: false
