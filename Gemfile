@@ -8,6 +8,8 @@ gem 'puma'
 gem 'mongo'
 gem 'json'
 gem 'prometheus-client'
+gem 'rack'
+gem 'rack-test'
 
 group :development do
     gem 'capistrano',         require: false
