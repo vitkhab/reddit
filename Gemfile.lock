@@ -35,6 +35,7 @@ GEM
     prometheus-client (0.8.0)
       quantile (~> 0.2.1)
     puma (3.10.0)
+    quantile (0.2.1)
     rack (2.0.5)
     rack-protection (2.0.2)
       rack
