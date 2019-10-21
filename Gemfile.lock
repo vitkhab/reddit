@@ -66,7 +66,8 @@ DEPENDENCIES
   mongo
   prometheus-client
   puma
+  rack
   sinatra (~> 2.0.1)
 
 BUNDLED WITH
-   1.16.1
+   2.0.2
