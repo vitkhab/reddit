@@ -3,7 +3,7 @@
 ## Deploy using Capistrano
 
 #### Requirements for the target host:
-* Ruby (>2.2.0) installed via `rvm`
+* Ruby (>2.2.0, <2.4.0) installed via `rvm`
 * MongDB
 * ports `22` and `9292` should be reachable by you
 
