@@ -37,6 +37,10 @@ zipkin_config = {
     json_api_host: 'http://zipkin:9411/api/v1/spans'
   }
 
+if settings.zipkin_enabled?
+  use ZipkinTracer::RackHandler, zipkin_config
+end
+
 configure do
     db = Mongo::Client.new(DATABASE_URL,
         user: DATABASE_USER,
