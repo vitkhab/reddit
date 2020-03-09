@@ -62,6 +62,31 @@ ui_health_gauge = Prometheus::Client::Gauge.new(
   'Health status of UI service'
 )
 prometheus.register(ui_health_gauge)
+comment_health_gauge = Prometheus::Client::Gauge.new(
+  :comment_health,
+  'Health status of Comment service'
+)
+comment_health_db_gauge = Prometheus::Client::Gauge.new(
+  :comment_health_mongo_availability,
+  'Check if MongoDB is available to Comment'
+)
+comment_count = Prometheus::Client::Counter.new(
+  :comment_count,
+  'A counter of new comments'
+)
+prometheus.register(comment_health_gauge)
+prometheus.register(comment_health_db_gauge)
+prometheus.register(comment_count)
+
+# Schedule health check function
+scheduler = Rufus::Scheduler.new
+scheduler.every '5s' do
+  #check = JSON.parse(http_healthcheck_handler(POST_URL, COMMENT_URL, VERSION))
+  check = JSON.parse(healthcheck_handler(DATABASE_URL))
+  set_health_gauge(comment_health_gauge, check['status'])
+  set_health_gauge(comment_health_db_gauge, check['dependent_services']['commentdb'])
+  set_health_gauge(ui_health_gauge, check['status'])
+end
 
 before do
   session[:flashes] = [] if session[:flashes].class != Array
