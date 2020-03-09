@@ -100,6 +100,15 @@ before do
   env['rack.logger'] = settings.mylogger # set custom logger
 end
 
+# after each request
+after do
+  request_id = env['REQUEST_ID'] || 'null'
+  logger.info("service=ui | event=request | path=#{env['REQUEST_PATH']} | " \
+              "request_id=#{request_id} | " \
+              "remote_addr=#{env['REMOTE_ADDR']} | " \
+              "method= #{env['REQUEST_METHOD']} | " \
+              "response_status=#{response.status}")
+end
 
 get '/' do
   @title = 'All posts'
