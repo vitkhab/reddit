@@ -7,7 +7,7 @@ services:
     ports:
       - 9292:9292
     environment:
-      DATABASE_URL: mongo:27017
+      DATABASE_URL: mongodb://mongo:27017
       
   mongo:
     image: mongo:3.6.17

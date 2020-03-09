@@ -15,7 +15,7 @@ require_relative 'helpers'
 ZIPKIN_ENABLED ||= ENV['ZIPKIN_ENABLED'] || false
 
 # Database connection info
-DATABASE_URL  ||=  ENV['DATABASE_URL'] || '127.0.0.1:27017'
+DATABASE_URL  ||=  ENV['DATABASE_URL'] || 'mongodb://127.0.0.1:27017'
 DATABASE_USER ||=  ENV['DATABASE_USER'] || ''
 DATABASE_PASS ||=  ENV['DATABASE_PASS'] || ''
 DATABASE_NAME ||= ENV['DATABASE_NAME'] || 'user_posts'
@@ -48,11 +48,16 @@ configure do
   set :mylogger, Logger.new('reddit.log')
   Mongo::Logger.logger = settings.mylogger
   
-    db = Mongo::Client.new(DATABASE_URL,
-        user: DATABASE_USER,
-        password: DATABASE_PASS,
-        database: DATABASE_NAME,
-        heartbeat_frequency: 2)
+  db = Mongo::Client.new(DATABASE_URL,
+  # user: DATABASE_USER,
+  # password: DATABASE_PASS,
+  # database: DATABASE_NAME,
+  heartbeat_frequency: 2)
+    # db = Mongo::Client.new(DATABASE_URL,
+    #     user: DATABASE_USER,
+    #     password: DATABASE_PASS,
+    #     database: DATABASE_NAME,
+    #     heartbeat_frequency: 2)
     set :mongo_db, db[:posts]
     set :comments_db, db[:comments]
     set :users_db, db[:users]
