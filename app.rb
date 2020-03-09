@@ -15,10 +15,10 @@ require_relative 'helpers'
 ZIPKIN_ENABLED ||= ENV['ZIPKIN_ENABLED'] || false
 
 # Database connection info
-DATABASE_HOST ||= ENV['DATABASE_HOST'] || '127.0.0.1'
-DATABASE_PORT ||= ENV['DATABASE_PORT'] || '27017'
+DATABASE_URL  ||=  ENV['DATABASE_URL'] || '127.0.0.1:27017'
+DATABASE_USER ||=  ENV['DATABASE_USER'] || ''
+DATABASE_PASS ||=  ENV['DATABASE_PASS'] || ''
 DATABASE_NAME ||= ENV['DATABASE_NAME'] || 'user_posts'
-DB_URL ||= "mongodb://#{DATABASE_HOST}:#{DATABASE_PORT}"
 
 # App version and build info
 #VERSION ||= File.read('VERSION').strip
@@ -38,10 +38,10 @@ zipkin_config = {
   }
 
 configure do
-    db = Mongo::Client.new([ ENV['DATABASE_URL'] || '127.0.0.1:27017' ],
-        user: ENV['DATABASE_USER'] || '',
-        password: ENV['DATABASE_PASS'] || '',
-        database: ENV['DATABASE_NAME'] || 'user_posts',
+    db = Mongo::Client.new(DATABASE_URL,
+        user: DATABASE_USER,
+        password: DATABASE_PASS,
+        database: DATABASE_NAME,
         heartbeat_frequency: 2)
     set :mongo_db, db[:posts]
     set :comments_db, db[:comments]
