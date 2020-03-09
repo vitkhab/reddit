@@ -247,3 +247,12 @@ post '/post/:id/comment' do
   end
     redirect back
 end
+
+# health check endpoint
+get '/healthcheck' do
+  http_healthcheck_handler()
+end
+
+get '/*' do
+  halt 404, 'Page not found'
+end
