@@ -42,6 +42,12 @@ if settings.zipkin_enabled?
 end
 
 configure do
+  set :server, :puma
+  set :logging, false
+#  set :mylogger, Logger.new(STDOUT)
+  set :mylogger, Logger.new('reddit.log')
+  Mongo::Logger.logger = settings.mylogger
+  
     db = Mongo::Client.new(DATABASE_URL,
         user: DATABASE_USER,
         password: DATABASE_PASS,
@@ -88,8 +94,10 @@ scheduler.every '5s' do
   set_health_gauge(ui_health_gauge, check['status'])
 end
 
+# before each request
 before do
   session[:flashes] = [] if session[:flashes].class != Array
+  env['rack.logger'] = settings.mylogger # set custom logger
 end
 
 
