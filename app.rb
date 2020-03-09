@@ -1,11 +1,16 @@
 require 'sinatra'
+require 'sinatra/reloader'
 require 'json/ext' # for .to_json
 require 'haml'
 require 'uri'
 require 'mongo'
 require 'bcrypt'
-require './helpers'
 require 'prometheus/client'
+require 'rufus-scheduler'
+require 'logger'
+require 'faraday'
+require 'zipkin-tracer'
+require_relative 'helpers'
 
 
 configure do
