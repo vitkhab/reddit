@@ -114,8 +114,14 @@ get '/' do
   @title = 'All posts'
   begin
     @posts = JSON.parse(settings.mongo_db.find.sort(timestamp: -1).to_a.to_json)
-  rescue
-    session[:flashes] << { type: 'alert-danger', message: 'Can\'t show blog posts, some problems with database. <a href="." class="alert-link">Refresh?</a>' }
+  rescue StandardError => e
+    flash_danger('Can\'t show blog posts, some problems with the post ' \
+                 'service. <a href="." class="alert-link">Refresh?</a>')
+    log_event('error', 'show_all_posts',
+              "Failed to read from Post service. Reason: #{e.message}")
+  else
+    log_event('info', 'show_all_posts',
+              'Successfully showed the home page with posts')
   end
   @flashes = session[:flashes]
   session[:flashes] = nil
@@ -136,14 +142,18 @@ post '/new' do
     begin
       result = db.insert_one title: params['title'], created_at: Time.now.to_i, link: params['link'], votes: 0
       db.find(_id: result.inserted_id).to_a.first.to_json
-    rescue
-      session[:flashes] << { type: 'alert-danger', message: 'Can\'t save your post, some problems with the post service' }
+    rescue StandardError => e
+      flash_danger("Can't save your post, some problems with the post service")
+      log_event('error', 'post_create',
+                "Failed to create a post. Reason: #{e.message}", params)
     else
-      session[:flashes] << { type: 'alert-success', message: 'Post successuly published' }
+      flash_success('Post successuly published')
+      log_event('info', 'post_create', 'Successfully created a post', params)
     end
     redirect '/'
   else
-    session[:flashes] << { type: 'alert-danger', message: 'Invalid URL' }
+    flash_danger('Invalid URL')
+    log_event('warning', 'post_create', 'Invalid URL', params)
     redirect back
   end
 end
@@ -208,7 +218,7 @@ end
 
 
 put '/post/:id/vote/:type' do
-  if logged_in?
+  begin
     id   = object_id(params[:id])
     post = JSON.parse(document_by_id(params[:id]))
     post['votes'] += params[:type].to_i
@@ -216,8 +226,12 @@ put '/post/:id/vote/:type' do
     settings.mongo_db.find(:_id => id).
       find_one_and_update('$set' => {:votes => post['votes']})
     document_by_id(id)
+  rescue StandardError => e
+    flash_danger('Can\'t vote, some problems with the post service')
+    log_event('error', 'vote',
+              "Failed to vote. Reason: #{e.message}", params)
   else
-    session[:flashes] << { type: 'alert-danger', message: 'You need to log in before you can vote' }
+    log_event('info', 'vote', 'Successful vote', params)
   end
   redirect back
 end
@@ -225,9 +239,27 @@ end
 
 get '/post/:id' do
   @title = 'Post'
-  @post = JSON.parse(document_by_id(params[:id]))
+
+  begin
+    @post = JSON.parse(document_by_id(params[:id]))
+  rescue StandardError => e
+    log_event('error', 'show_post',
+              "Counldn't show the post. Reason: #{e.message}", params)
+    halt 404, 'Not found'
+  end
+
   id   = object_id(params[:id])
-  @comments = JSON.parse(settings.comments_db.find(post_id: "#{id}").to_a.to_json)
+  begin
+    @comments = JSON.parse(settings.comments_db.find(post_id: "#{id}").to_a.to_json)
+  rescue StandardError => e
+    log_event('error', 'show_post',
+              "Counldn't show the comments. Reason: #{e.message}", params)
+    flash_danger("Can't show comments, some problems with the comment service")
+  else
+    log_event('info', 'show_post',
+              'Successfully showed the post', params)
+  end
+
   @flashes = session[:flashes]
   session[:flashes] = nil
   haml :show
@@ -240,10 +272,17 @@ post '/post/:id/comment' do
   begin
     result = db.insert_one post_id: params[:id], name: session[:username], body: params['body'], created_at: Time.now.to_i
     db.find(_id: result.inserted_id).to_a.first.to_json
-  rescue
-    session[:flashes] << { type: 'alert-danger', message: 'Can\'t save your comment, some problems with the comment service' }
+  rescue StandardError => e
+    log_event('error', 'create_comment',
+              "Counldn't create a comment. Reason: #{e.message}", params)
+    flash_danger("Can\'t save the comment,
+                 some problems with the comment service")
   else
-    session[:flashes] << { type: 'alert-success', message: 'Comment successuly published' }
+    log_event('info', 'create_comment',
+              'Successfully created a new post', params)
+    comment_count.increment
+
+    flash_success('Comment successuly published')
   end
     redirect back
 end
