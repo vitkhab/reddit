@@ -12,6 +12,30 @@ require 'faraday'
 require 'zipkin-tracer'
 require_relative 'helpers'
 
+ZIPKIN_ENABLED ||= ENV['ZIPKIN_ENABLED'] || false
+
+# Database connection info
+DATABASE_HOST ||= ENV['DATABASE_HOST'] || '127.0.0.1'
+DATABASE_PORT ||= ENV['DATABASE_PORT'] || '27017'
+DATABASE_NAME ||= ENV['DATABASE_NAME'] || 'user_posts'
+DB_URL ||= "mongodb://#{DATABASE_HOST}:#{DATABASE_PORT}"
+
+# App version and build info
+#VERSION ||= File.read('VERSION').strip
+#BUILD_INFO = File.readlines('build_info.txt')
+@@host_info=ENV['HOSTNAME']
+@@env_info=ENV['ENV']
+
+# Zipkin opts
+set :zipkin_enabled, ZIPKIN_ENABLED
+zipkin_config = {
+    service_name: 'ui_app',
+    service_port: 9292,
+    sample_rate: 1,
+    sampled_as_boolean: false,
+    log_tracing: true,
+    json_api_host: 'http://zipkin:9411/api/v1/spans'
+  }
 
 configure do
     db = Mongo::Client.new([ ENV['DATABASE_URL'] || '127.0.0.1:27017' ],
